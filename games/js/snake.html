@@ -1,0 +1,215 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Smart47 Game - Snake</title>
+</head>
+<body>
+	<a href="../../index.html">BACK</a><br>
+	<MyScore id = "id_my_score_1"></MyScore>
+	<MyTable id = "id_my_table_1"></MyTable>
+	<My id = "id_my_2">
+	<center>
+		<br>
+		<button id="id_button_UP" onmousedown="ChangeDirection('up')">UP</button>
+		<br><br>
+		<button id="id_button_LEFT" onmousedown="ChangeDirection('left')">LEFT</button>
+		<button id="id_button_DOWN" onmousedown="ChangeDirection('down')">DOWN</button>
+		<button id="id_button_RIGHT" onmousedown="ChangeDirection('right')">RIGHT</button>
+		<br><br>
+		<button id="id_button_STOP" onmousedown="ChangeDirection('stop')">STOP</button>
+	</center>
+	</My>
+	<script type="text/javascript">
+
+		var ThroughWall = 1;
+		var v_col_num = 30;
+		var v_row_num = 30;
+		var v_button_width = "70";
+		var v_button_height = "70";
+		var v_width = 10;
+		var v_height = 10;
+		var v_str = "";
+		var SnakeMaxLength = 30;
+		var SnakeCurLength = 1;
+		var CurScore = 0;
+		var FruitX;
+		var FruitY;
+		var SnakeX = [];
+		var SnakeY = [];
+		var LastX;
+		var LastY;
+		var DefColBG = "white";
+		var FruitCol = "red";
+		var SnakeHeadCol = "blue";
+		var SnakeTailCol = "aqua";
+		var WallCol = "black";
+		var CurDirect = "stop";
+		var gameEnd = 0;
+
+		v_str += "<center><table border = \"1\">";
+		for (var i = 0; i < v_row_num; i++) {
+			v_str += "<tr>";
+			for (var j = 0; j < v_col_num; j++) {
+				v_str += "<td width = \"" + v_width + "\" height = \"" + v_height + "\" id = \"" + "id_cell_" + (i + 1) + "_" + (j + 1) + "\"></td>";
+			}
+			v_str += "</tr>";
+		}
+		v_str += "</table></center>";
+		document.getElementById("id_my_table_1").innerHTML = v_str;
+
+		document.getElementById("id_button_LEFT").style = "width: " + v_button_width + "px; height: " + v_button_height + "px";
+		document.getElementById("id_button_RIGHT").style = "width: " + v_button_width + "px; height: " + v_button_height + "px";
+		document.getElementById("id_button_UP").style = "width: " + v_button_width + "px; height: " + v_button_height + "px";
+		document.getElementById("id_button_DOWN").style = "width: " + v_button_width + "px; height: " + v_button_height + "px";
+		document.getElementById("id_button_STOP").style = "width: " + v_button_width + "px; height: " + v_button_height + "px";
+
+		SnakeX.push(v_row_num / 2);
+		SnakeY.push(v_col_num / 2);
+
+		for (var i = 2; i < v_row_num; i++) {
+			for (var j = 2; j < v_col_num; j++) {
+				SetCol(i, j, DefColBG);
+			}
+		}
+
+		for (var i = 1; i <= v_row_num; i++) {
+			SetCol(i, 1, WallCol);
+			SetCol(i, v_col_num, WallCol);
+		}
+
+		for (var i = 1; i <= v_col_num; i++) {
+			SetCol(1, i, WallCol);
+			SetCol(v_row_num, i, WallCol);
+		}
+
+		SetCol(SnakeX[0], SnakeY[0], SnakeHeadCol);
+
+		GenerateFruit();
+
+		function Rand (min, max) {
+		  	min = Math.ceil(min);
+		  	max = Math.floor(max);
+		  	return Math.floor(Math.random() * (max - min)) + min;
+		}
+
+		function SetCol (x, y, c) {
+			document.getElementById("id_cell_" + x + "_" + y).style.backgroundColor = c;
+		}
+
+		var RETURN_BOOL = 1;
+
+		function CheckFruitCoord (x, y) {
+			RETURN_BOOL = 0;
+			for (var i = 0; i < SnakeX.length; i++) {
+				if (SnakeX[i] == x && SnakeY[i] == y) {
+					RETURN_BOOL = 1;
+					break;
+				}
+			}
+		}
+
+		function GenerateFruit () {
+			RETURN_BOOL = 1;
+			while (RETURN_BOOL == 1) {
+				cx = Rand(0, v_col_num + 2) % v_col_num;
+				cy = Rand(0, v_row_num + 2) % v_row_num;
+				if (cx <= 1) {
+					cx = 2;
+				}
+				if (cy <= 1) {
+					cy = 2;
+				}
+				CheckFruitCoord(cx, cy);
+			}
+			FruitX = cx;
+			FruitY = cy;
+			SetCol(FruitX, FruitY, FruitCol);
+		}
+
+		function ChangeDirection (dir) {
+			CurDirect = dir;
+		}
+
+		function GameOver () {
+			gameEnd = 1;
+			CurDirect = "stop";
+			document.getElementById("id_my_2").innerHTML = "";
+		}
+
+		function CheckCollision () {
+			L = SnakeX.length;
+			for (var i = 1; i < L; i++) {
+				if (SnakeX[i] == SnakeX[0] && SnakeY[i] == SnakeY[0]) {
+					GameOver();
+					break;
+				}
+			}
+			if (ThroughWall == 0) {
+				if (SnakeX[0] <= 1 || SnakeX[0] >= v_row_num || SnakeY[0] <= 1 || SnakeY[0] >= v_col_num) {
+					GameOver();
+				}
+			}
+		}
+
+		function MoveSnake () {
+			var L = SnakeX.length;
+			LastX = SnakeX[L - 1];
+			LastY = SnakeY[L - 1];
+			SetCol(SnakeX[L - 1], SnakeY[L - 1], DefColBG);
+			if (L > 1) {
+				SetCol(SnakeX[0], SnakeY[0], SnakeTailCol);
+			}
+			for (var i = L - 1; i > 0; i--) {
+				SnakeX[i] = SnakeX[i - 1];
+				SnakeY[i] = SnakeY[i - 1];
+			}
+			if (CurDirect == "up") {
+				SnakeX[0]--;
+			}else if (CurDirect == "down") {
+				SnakeX[0]++;
+			}else if (CurDirect == "left") {
+				SnakeY[0]--;
+			}else if (CurDirect == "right") {
+				SnakeY[0]++;
+			}
+			if (ThroughWall != 0) {
+				if (SnakeX[0] <= 1) {
+					SnakeX[0] = v_row_num - 1;
+				}
+				if (SnakeX[0] >= v_row_num) {
+					SnakeX[0] = 2;
+				}
+				if (SnakeY[0] <= 1) {
+					SnakeY[0] = v_col_num - 1;
+				}
+				if (SnakeY[0] >= v_col_num) {
+					SnakeY[0] = 2;
+				}
+			}
+			SetCol(SnakeX[0], SnakeY[0], SnakeHeadCol);
+			CheckCollision();
+		}
+
+		setInterval(function () {
+			if (gameEnd == 0) {
+				MoveSnake();
+				if (SnakeX[0] == FruitX && SnakeY[0] == FruitY) {
+					CurScore++;
+					if (SnakeCurLength < SnakeMaxLength) {
+						SnakeCurLength++;
+						SnakeX.push(LastX);
+						SnakeY.push(LastY);
+						SetCol(LastX, LastY, SnakeTailCol);
+						SetCol(SnakeX[0], SnakeY[0], SnakeHeadCol);
+					}
+					GenerateFruit();
+					var curStr = "<center><b><font color = \"green\">Score: " + CurScore + "</font></b></center><br>";
+					document.getElementById("id_my_score_1").innerHTML = curStr;
+				}
+			}
+		}, 200);
+
+	</script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Smart47 Game - Крестики Нолики</title>
+</head>
+<body>
+	<a href="../../index.html">BACK</a><br>
+	<center>
+	<font id="id_score_1"></font>
+	<br>
+	<font id="id_score_2"></font>
+	<table border = "1" bgcolor="green">
+		<tr><td width="100" height="100" id="id_1" onmouseenter="HighLight(1)" onmouseleave="LowLight(1)" onclick="Pressed(1)"></td><td width="100" height="100" id="id_2" onmouseenter="HighLight(2)" onmouseleave="LowLight(2)" onclick="Pressed(2)"></td><td width="100" height="100" id="id_3" onmouseenter="HighLight(3)" onmouseleave="LowLight(3)" onclick="Pressed(3)"></td></tr>
+		<tr><td width="100" height="100" id="id_4" onmouseenter="HighLight(4)" onmouseleave="LowLight(4)" onclick="Pressed(4)"></td><td width="100" height="100" id="id_5" onmouseenter="HighLight(5)" onmouseleave="LowLight(5)" onclick="Pressed(5)"></td><td width="100" height="100" id="id_6" onmouseenter="HighLight(6)" onmouseleave="LowLight(6)" onclick="Pressed(6)"></td></tr>
+		<tr><td width="100" height="100" id="id_7" onmouseenter="HighLight(7)" onmouseleave="LowLight(7)" onclick="Pressed(7)"></td><td width="100" height="100" id="id_8" onmouseenter="HighLight(8)" onmouseleave="LowLight(8)" onclick="Pressed(8)"></td><td width="100" height="100" id="id_9" onmouseenter="HighLight(9)" onmouseleave="LowLight(9)" onclick="Pressed(9)"></td></tr>
+	</table>
+	<br>
+	<button id="id_button_again_1" onclick="RefreshColors()">Заново</button>
+	<br>
+	<font id="id_winner"></font>
+	</center>
+	<script type="text/javascript">
+		var v_clicked = 0;
+		var v_score_font_size = 20;
+		var v_won_1 = 0;
+		var v_won_2 = 0;
+		var v_def_col = "white";
+		var v_col_1 = "aqua";
+		var v_col_2 = "red";
+		var v_width = 150;
+		var v_height = 150;
+		var v_main_priority = 1;
+		var v_priority = 1;
+		var v_end = 0;
+		var v_win = "☻";
+		var v_win_html = "<center><font size = \"20\" color = \"yellow\">" + v_win + "</font></center>";
+		var PressedCoord = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+		document.getElementById("id_score_1").size = v_score_font_size;
+		document.getElementById("id_score_1").style.color = v_col_1;
+		document.getElementById("id_score_1").innerText = "Синие: " + v_won_1;
+		document.getElementById("id_score_2").size = v_score_font_size;
+		document.getElementById("id_score_2").style.color = v_col_2;
+		document.getElementById("id_score_2").innerHTML = "Красные: " + v_won_1;
+		document.getElementById("id_button_again_1").style.color = v_col_1;
+		document.getElementById("id_button_again_1").style.backgroundColor = v_col_2;
+		for (var i = 1; i <= 9; i++) {
+			document.getElementById("id_" + i).width = v_width;
+			document.getElementById("id_" + i).height = v_height;
+			document.getElementById("id_" + i).style.backgroundColor = v_def_col;
+			document.getElementById("id_" + i).innerHTML = "";
+		}
+		function HighLight (c_id) {
+			var v_i = Math.floor((c_id - 1) / 3);
+			var v_j = c_id - (v_i * 3) - 1;
+			if (v_end == 0 && PressedCoord[v_i][v_j] == 0) {
+				if (v_priority == 1) {
+					document.getElementById("id_" + c_id).style.backgroundColor = v_col_1;
+				}else {
+					document.getElementById("id_" + c_id).style.backgroundColor = v_col_2;
+				}
+			}
+		}
+		function LowLight (c_id) {
+			var v_i = Math.floor((c_id - 1) / 3);
+			var v_j = c_id - (v_i * 3) - 1;
+			if (PressedCoord[v_i][v_j] == 0) {
+				document.getElementById("id_" + c_id).style.backgroundColor = v_def_col;
+			}
+		}
+		function RefreshColors () {
+			for (var i = 1; i <= 9; i++) {
+				document.getElementById("id_" + i).width = v_width;
+				document.getElementById("id_" + i).height = v_height;
+				document.getElementById("id_" + i).style.backgroundColor = v_def_col;
+				document.getElementById("id_" + i).innerHTML = "";
+			}
+			v_end = 0;
+			document.getElementById("id_winner").innerHTML = "";
+			v_clicked = 0;
+			PressedCoord = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+			v_main_priority = 3 - v_main_priority;
+			v_priority = v_main_priority;
+		}
+		function RefreshScore () {
+			document.getElementById("id_score_1").size = v_score_font_size;
+			document.getElementById("id_score_1").style.color = v_col_1;
+			document.getElementById("id_score_1").innerHTML = "Синие: " + v_won_1;
+			document.getElementById("id_score_2").size = v_score_font_size;
+			document.getElementById("id_score_2").style.color = v_col_2;
+			document.getElementById("id_score_2").innerHTML = "Красные: " + v_won_2;
+			document.getElementById("id_button_again_1").style.color = v_col_1;
+			document.getElementById("id_button_again_1").style.backgroundColor = v_col_2;
+		}
+		function CheckPos (a, x1, y1, x2, y2, x3, y3) {
+			return a[x1][y1] == a[x2][y2] && a[x2][y2] == a[x3][y3] && a[x1][y1] != 0;
+		}
+		function CheckWin () {
+			a = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+			b = [[0, 0, 0, 1, 0, 2], [1, 0, 1, 1, 1, 2], [2, 0, 2, 1, 2, 2], [0, 0, 1, 0, 2, 0], [0, 1, 1, 1, 2, 1], [0, 2, 1, 2, 2, 2], [0, 0, 1, 1, 2, 2], [0, 2, 1, 1, 2, 0]];
+			for (var i = 1; i <= 9; i++) {
+				if (document.getElementById("id_" + i).style.backgroundColor == v_col_1) {
+					var v_i = Math.floor((i - 1) / 3);
+					var v_j = i - (v_i * 3) - 1;
+					a[v_i][v_j] = 1;
+				}else if (document.getElementById("id_" + i).style.backgroundColor == v_col_2) {
+					var v_i = Math.floor((i - 1) / 3);
+					var v_j = i - (v_i * 3) - 1;
+					a[v_i][v_j] = 2;
+				}
+			}
+			for (var i = 0; i < b.length; i++) {
+				c = b[i];
+				if (CheckPos(a, c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7])) {
+					if (a[c[0]][c[1]] == 1) {
+						v_won_1++;
+						document.getElementById("id_winner").style.color = v_col_1;
+						document.getElementById("id_winner").size = v_score_font_size;
+						document.getElementById("id_winner").innerHTML = "Синие Победили!";
+					}else {
+						v_won_2++;
+						document.getElementById("id_winner").style.color = v_col_2;
+						document.getElementById("id_winner").size = v_score_font_size;
+						document.getElementById("id_winner").innerHTML = "Красные Победили!";
+					}
+					RefreshScore();
+					for (var j = 0; j < c.length; j += 2) {
+						var v_cur_1, v_cur_2, v_cur;
+						v_cur_1 = c[j];
+						v_cur_2 = c[j + 1];
+						v_cur = (v_cur_1 * 3) + v_cur_2 + 1;
+						document.getElementById("id_" + v_cur).innerHTML = v_win_html;
+					}
+					v_end = 1;
+					break;
+				}
+			}
+		}
+		function Pressed (v_id) {
+			if (v_end == 0) {
+				var v_i = Math.floor((v_id - 1) / 3);
+				var v_j = v_id - (v_i * 3) - 1;
+				if (PressedCoord[v_i][v_j] == 0) {
+					if (v_priority == 1) {
+						document.getElementById("id_" + v_id).style.backgroundColor = v_col_1;
+					}else {
+						document.getElementById("id_" + v_id).style.backgroundColor = v_col_2;
+					}
+					v_priority = 3 - v_priority;
+					PressedCoord[v_i][v_j] = 1;
+					CheckWin();
+					v_clicked++;
+					if (v_end == 0 && v_clicked == 9) {
+						document.getElementById("id_winner").style.color = "yellow";
+						document.getElementById("id_winner").size = v_score_font_size;
+						document.getElementById("id_winner").innerHTML = "Ничья!";
+					}
+				}
+			}
+		}
+	</script>
+</body>
+</html>
